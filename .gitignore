@@ -1,0 +1,22 @@
+node_modules/
+dist/
+# configurações do usuário (contêm chaves de API): nunca versionar/compartilhar
+data/
+# resultados gerados pelo agente (podem conter dados de clientes)
+saidas/
+
+Workspace/
+
+selftest.txt
+dist_old*/
+
+# skills instaladas localmente (extensões do usuário, não fazem parte do código do Loop-AI)
+skills/
+plugins/
+
+# relatórios/diagnósticos gerados manualmente durante testes (podem conter dados de clientes)
+relatorios/
+
+# notas internas de desenvolvimento (não fazem parte da documentação pública)
+docs/PLANO.md
+docs/MEMORIA.md

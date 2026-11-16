@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; img-src data: blob:; worker-src 'self' blob:; style-src 'unsafe-inline'; font-src data:">
+<script src="../../../node_modules/pdfjs-dist/build/pdf.js"></script>
+<script>
+// Página interna (janela oculta): desenha páginas de PDF em imagem PNG para o OCR. Não é exibida ao usuário.
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../node_modules/pdfjs-dist/build/pdf.worker.js';
+let doc = null;
+async function loadPdf(b64) {
+  const bin = atob(b64), u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  doc = await pdfjsLib.getDocument({ data: u, isEvalSupported: false, disableFontFace: false }).promise;
+  return doc.numPages;
+}
+async function renderPage(n, scale) {
+  const page = await doc.getPage(n), vp = page.getViewport({ scale });
+  const c = document.createElement('canvas');
+  c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  return c.toDataURL('image/png').split(',')[1];
+}
+</script>

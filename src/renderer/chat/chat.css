@@ -1,0 +1,53 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; font: 13px "Segoe UI", sans-serif; color: #cfe3f5; }
+#panel { height: 100%; margin: 0; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px;
+  background: linear-gradient(160deg, #1b2a3f, #121c2c); border: 1px solid #3a6f8f; border-radius: 18px; }
+header { display: flex; justify-content: space-between; -webkit-app-region: drag; color: #7fd4f5; }
+header button { -webkit-app-region: no-drag; background: none; border: 0; color: #7fb0c8; font-size: 18px; cursor: pointer; }
+#log { flex: 1; min-height: 60px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.msg { padding: 6px 8px; border-radius: 10px; white-space: pre-wrap; word-break: break-word; max-width: 92%; }
+.msg.user { align-self: flex-end; background: var(--user-bg, #214a68); color: var(--user-text, #e4f1fb); }
+.msg.bot { background: var(--bot-bg, transparent); color: var(--bot-text, #cfe3f5); }
+.msg.err { color: #ff8a8a; }
+.msg.working { color: #7f9bb1; font-style: italic; }
+details summary { cursor: pointer; font-size: 12px; color: #d9a0e8; }
+#think { margin: 6px 0 0; height: 110px; overflow: auto; padding: 8px; background: #070d16; border: 1px solid #284257; border-radius: 10px;
+  font: 12px Consolas, monospace; color: var(--think-text, #8aa3b8); white-space: pre-wrap; }
+#status { font-size: 11px; color: #7f9bb1; }
+#chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { background: #214a68; border-radius: 8px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+#input { resize: none; padding: 10px; background: #0f1826; color: #e4f1fb; border: 1px solid #3a6f8f; border-radius: 12px; font: inherit; outline: none; }
+footer { display: flex; gap: 8px; }
+footer button { min-width: 40px; width: auto; padding: 0 8px; height: 30px; background: #172638; border: 1px solid #3a6f8f; border-radius: 9px; cursor: pointer; }
+footer button:hover { background: #20364d; }
+body.dropping #panel { outline: 2px dashed #7fd4f5; }
+
+.msg.perm { background: #2a2338; border: 1px solid #6a4f8f; align-self: stretch; max-width: 100%; }
+.msg.perm code { display: block; margin: 4px 0; padding: 4px 6px; background: #0b1320; border-radius: 6px; font: 11px Consolas, monospace; white-space: pre-wrap; }
+.msg.perm .btns { display: flex; gap: 6px; }
+.msg.perm button { padding: 3px 10px; background: #214a68; color: #e4f1fb; border: 1px solid #3a6f8f; border-radius: 7px; cursor: pointer; }
+
+/* barras de rolagem internas: finas e discretas */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #2f4f68; border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+#stop { background: #c62828; border-color: #ff6b6b; color: #fff; font-weight: 700; }
+#stop:hover { background: #e53935; }
+.msg.proj { background: #1f3a2d; border: 1px solid #3f7a5a; align-self: stretch; max-width: 100%; display: flex; gap: 8px; align-items: center; font-size: 12px; }
+.msg.proj div { flex: 1; word-break: break-all; }
+.msg.proj button { padding: 3px 10px; background: #2b6f4a; color: #fff; border: 0; border-radius: 7px; cursor: pointer; }
+
+/* painéis (conversas salvas / desfazer) */
+#panel { position: relative; }
+#overlay { position: absolute; inset: 0; z-index: 5; background: rgba(5, 10, 18, .88); display: flex; padding: 14px; border-radius: 18px; }
+#overlay[hidden] { display: none; }
+#ovbox { flex: 1; display: flex; flex-direction: column; min-height: 0; background: #121c2c; border: 1px solid #3a6f8f; border-radius: 12px; padding: 10px; }
+.ovh { display: flex; justify-content: space-between; align-items: center; color: #7fd4f5; margin-bottom: 6px; }
+.ovh button { background: none; border: 0; color: #7fb0c8; font-size: 18px; cursor: pointer; }
+#ovbody { overflow-y: auto; flex: 1; }
+.ovrow { display: flex; gap: 8px; align-items: center; padding: 6px 4px; border-bottom: 1px solid #25405a; }
+.ovrow .t { flex: 1; word-break: break-word; font-size: 12px; } .ovrow .t small { display: block; color: #7f9bb1; }
+.ovrow button { padding: 3px 9px; background: #214a68; color: #e4f1fb; border: 1px solid #3a6f8f; border-radius: 7px; cursor: pointer; }
+.ovrow button:disabled { opacity: .4; cursor: default; } .ovrow button.del { color: #ff9a9a; }
+.ovnote { color: #7f9bb1; font-size: 11px; padding: 6px 2px; }

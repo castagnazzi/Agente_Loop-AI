@@ -1,0 +1,31 @@
+{
+  "name": "loop-ai",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "castagnazzi",
+  "description": "Loop-AI: assistente flutuante com agentes de IA para Windows (portátil)",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable --config builder.config.js",
+    "selftest": "electron . --selftest",
+    "pack": "electron-builder --win dir --config builder.config.js"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.18.0"
+  },
+  "dependencies": {
+    "docx": "^9.15.0",
+    "exceljs": "^4.4.0",
+    "jimp": "^1.6.1",
+    "jszip": "^3.10.2",
+    "mammoth": "^1.13.0",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^3.11.174",
+    "pptxgenjs": "^4.0.1",
+    "sql.js": "^1.10.3",
+    "tesseract.js": "^5.1.1",
+    "undici": "^6.29.1"
+  }
+}

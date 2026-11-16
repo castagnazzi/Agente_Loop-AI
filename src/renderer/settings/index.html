@@ -1,0 +1,257 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<style>
+  :root {
+    --bg: #0b1119; --sidebar: #0e1626; --panel: #121b2b; --panel2: #0e1726; --line: #1e2c3f; --line2: #2b3c52;
+    --txt: #dce6f0; --mut: #8696a8; --dim: #64758a; --acc: #5fb8e8; --pri: #2f6fd1; --pri2: #3f82e8;
+    --ok: #7ad99a; --bad: #f07a7a; --warn: #f0c060;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; min-width: 0; }
+  html, body { height: 100%; margin: 0; overflow-x: hidden; }
+  body { display: flex; flex-direction: column; background: var(--bg); color: var(--txt); font: 12.5px/1.4 "Segoe UI", system-ui, sans-serif; accent-color: var(--pri); }
+
+  .app { flex: 1; display: flex; min-height: 0; min-width: 0; }
+
+  /* ---- barra lateral ---- */
+  nav { flex: none; width: 168px; display: flex; flex-direction: column; gap: 2px; padding: 14px 8px; background: var(--sidebar); border-right: 1px solid var(--line); overflow-y: auto; }
+  nav .brand { font-size: 11px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px 12px; }
+  nav button { display: flex; align-items: center; gap: 9px; padding: 7px 9px; background: none; border: 0; border-radius: 7px; color: var(--mut); cursor: pointer; font: inherit; font-size: 12.5px; text-align: left; transition: color .15s, background .15s; }
+  nav button:hover { color: var(--txt); background: rgba(255,255,255,.04); }
+  nav button.on { color: #fff; background: var(--pri); font-weight: 600; }
+  nav .zoom { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 8px 4px 2px; }
+  nav .zoom button { padding: 3px 8px; justify-content: center; border: 1px solid var(--line2); font-size: 12px; }
+  nav .zoom span { font-size: 11px; color: var(--dim); cursor: pointer; }
+  nav .ver { margin-top: 6px; padding: 9px 9px 1px; font-size: 10px; color: var(--dim); border-top: 1px solid var(--line); }
+
+  main { flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 16px 18px 36px; scroll-behavior: smooth; }
+  main::-webkit-scrollbar { width: 9px; } main::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 6px; border: 2px solid var(--bg); }
+  section { display: none; width: 100%; max-width: 1100px; margin: 0 auto; } section.on { display: block; animation: fade .15s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+  /* ---- cartões ---- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px 13px; margin-bottom: 10px; }
+  .card > h3 { display: flex; align-items: center; gap: 7px; margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #f0f6fb; }
+  .card > .sub { margin: 0 0 8px; font-size: 11.5px; color: var(--dim); }
+  .card.star { background: linear-gradient(135deg, #16314f, #10233a); border-color: #2a5a85; }
+
+  label { display: block; margin: 9px 0 4px; font-size: 11.5px; color: var(--mut); font-weight: 500; }
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    width: 100%; min-width: 0; padding: 6px 9px; background: var(--panel2); color: #eaf3fb; border: 1px solid var(--line2); border-radius: 7px; font: inherit; font-size: 12.5px; outline: none; transition: border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(95,184,232,.15); }
+  textarea { font: 12px Consolas, monospace; height: 280px; resize: none; line-height: 1.5; }
+  input[type=range] { width: 100%; }
+  .hint { font-size: 10.5px; color: var(--dim); margin: 3px 0; font-weight: normal; }
+  .hint.err { color: var(--bad); min-height: 13px; }
+
+  button.b { padding: 7px 12px; background: #16253a; color: #e7f1fb; border: 1px solid var(--line2); border-radius: 7px; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 500; transition: background .15s, border-color .15s; }
+  button.b:hover { background: #1d3049; border-color: var(--acc); } button.b:active { transform: translateY(1px); }
+  button.pri { background: var(--pri); border-color: var(--pri); font-weight: 600; } button.pri:hover { background: var(--pri2); border-color: var(--pri2); }
+  button.del { color: var(--bad); } button.del:hover { background: #351a1f; border-color: var(--bad); }
+  .row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+  .row > * { flex: 1 1 110px; min-width: 0; } .row > .fix { flex: none; min-width: auto; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* ---- chaves liga/desliga ---- */
+  input.sw { appearance: none; -webkit-appearance: none; width: 34px; height: 19px; flex: none; border-radius: 20px; background: #223349; position: relative; cursor: pointer; transition: background .18s; margin: 0; }
+  input.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: #c5d7e8; transition: transform .18s; }
+  input.sw:checked { background: var(--pri); } input.sw:checked::after { transform: translateX(15px); background: #fff; }
+  label.swl { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; color: var(--txt); cursor: pointer; font-size: 13px; }
+  label.swl .hint { margin: 0; }
+
+  /* ---- provedores e modelos ---- */
+  #plist { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+  .pchip { padding: 6px 13px; background: var(--panel2); border: 1px solid var(--line2); border-radius: 16px; cursor: pointer; font-size: 12.5px; transition: all .15s; }
+  .pchip:hover { border-color: var(--acc); }
+  .pchip.on { background: var(--pri); border-color: var(--pri); color: #fff; font-weight: 600; }
+  #defbanner { display: flex; align-items: center; gap: 12px; }
+  #defbanner .big { flex: 1; font-size: 14.5px; font-weight: 600; color: var(--warn); word-break: break-all; }
+  #mlist { height: 210px; overflow-y: auto; margin-top: 8px; padding: 4px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; }
+  .mrow { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12.5px; border: 1px solid transparent; }
+  .mrow:hover { background: rgba(95,184,232,.07); }
+  .mrow.def { background: rgba(240,192,96,.10); border-color: rgba(240,192,96,.4); }
+  .mrow .name { flex: 1; word-break: break-all; }
+  .mrow .badge { font-size: 10.5px; color: var(--warn); font-weight: 600; white-space: nowrap; }
+  .mrow .use { font-size: 10.5px; color: var(--dim); opacity: 0; } .mrow:hover .use { opacity: 1; }
+  #mmsg { font-size: 11.5px; margin-left: 6px; }
+  .tip { padding: 8px 11px; margin-top: 8px; background: rgba(95,184,232,.06); border: 1px dashed var(--line2); border-radius: 8px; color: var(--mut); font-size: 11.5px; }
+
+  /* ---- extensões, agentes ---- */
+  .xlist { margin-top: 8px; } .xi { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; margin-bottom: 6px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; }
+  .xi .t { flex: 1; } .xi .t small { display: block; color: var(--dim); } .xi .err { color: var(--bad); } .xi button { padding: 3px 9px; }
+  .colors { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; } .colors label { display: flex; align-items: center; justify-content: space-between; margin: 4px 0; color: var(--txt); }
+  .colors input[type=color], #a_color { width: 44px; height: 27px; padding: 0; border: 1px solid var(--line2); border-radius: 6px; background: none; cursor: pointer; } .nobg { font-size: 11px; color: var(--mut); }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; margin: 6px 0 8px; padding: 8px 10px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; max-height: 150px; overflow-y: auto; }
+  .checks label { display: flex; gap: 6px; align-items: center; margin: 2px 0; color: var(--txt); font-size: 12px; cursor: pointer; }
+  .opt label, label.inl { display: flex; gap: 6px; align-items: center; margin: 2px 0; color: var(--txt); cursor: pointer; } .opt { gap: 18px; }
+  #a_system { height: 128px; resize: vertical; }
+  .checks[hidden] { display: none; }
+  #alist { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+
+  /* ---- rodapé ---- */
+  footer { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border-top: 1px solid var(--line); background: var(--sidebar); }
+  #msg { color: var(--ok); font-size: 12px; }
+</style></head>
+<body>
+  <div class="app">
+    <nav>
+      <div class="brand">Loop-AI</div>
+      <button data-t="models" class="on">🤖 Modelos</button>
+      <button data-t="agents">🧩 Agentes</button>
+      <button data-t="ext">🔌 Extensões</button>
+      <button data-t="general">⚙️ Geral</button>
+      <div class="zoom"><button id="zm" title="Diminuir texto (Ctrl −)">A−</button><span id="zv">90%</span><button id="zp" title="Aumentar texto (Ctrl +)">A+</button></div>
+      <div class="ver" id="verTag">Loop-AI</div>
+    </nav>
+    <main>
+      <section id="models" class="on">
+        <div class="card star" id="defbanner">
+          <div style="flex:1"><h3>⭐ Modelo padrão</h3><div class="big" id="defname"></div></div>
+          <div style="width:46%"><select id="defaultModel"></select></div>
+        </div>
+
+        <div class="card">
+          <h3>🌐 Motores de IA</h3>
+          <p class="sub">Escolha um motor (provedor), busque os modelos e clique em um para usá-lo.</p>
+          <div id="plist"></div>
+          <div class="row"><button class="b pri fix" id="newp">＋ Novo provedor</button> <button class="b fix" id="import">Importar do opencode.jsonc</button></div>
+        </div>
+
+        <div class="card" id="pform" hidden>
+          <h3>🔧 Configuração do motor</h3>
+          <div class="row">
+            <div><label>Nome</label><input type="text" id="pname" placeholder="ex.: NVIDIA"></div>
+            <div><label>Atalho</label><select id="preset"></select></div>
+          </div>
+          <label>URL da API (base)</label><input type="text" id="purl" placeholder="https://integrate.api.nvidia.com/v1">
+          <label>Chave da API (deixe vazio se não houver)</label><input type="password" id="pkey" placeholder="nvapi-…">
+          <div class="row" style="margin-top:12px">
+            <button class="b pri fix" id="fetch">🔍 Buscar modelos</button><span id="mmsg"></span>
+          </div>
+          <div class="tip">💡 <b>Clique em um modelo</b> da lista para usá-lo — ele já vira o <b>modelo padrão</b>. A caixinha só liga ou desliga o modelo no menu.</div>
+          <input type="text" id="mfilter" placeholder="🔎 Filtrar modelos…" style="margin-top:8px">
+          <div class="row" style="margin-top:6px"><span class="hint" id="mcount"></span>
+            <button class="b fix" id="selvis">Marcar visíveis</button><button class="b fix" id="clrvis">Desmarcar visíveis</button></div>
+          <div id="mlist"></div>
+          <div class="row" style="margin-top:10px"><button class="b del fix" id="delp">🗑 Remover provedor</button></div>
+        </div>
+        <div class="hint">Só os modelos marcados aparecem no seletor. Cada agente também pode usar outro modelo (aba Agentes).</div>
+      </section>
+
+      <section id="agents">
+        <div class="card">
+          <h3>🎯 Agente ativo</h3>
+          <p class="sub">É o agente que conversa com você. Os "ajudantes" só recebem tarefas do principal.</p>
+          <select id="activeAgent"></select>
+        </div>
+        <div class="card">
+          <h3>🧩 Seus agentes</h3>
+          <p class="sub">Escolha um agente abaixo para editar.</p>
+          <div id="alist"></div>
+          <div class="row" style="margin:6px 0"><button class="b pri fix" id="newAgent">＋ Novo agente</button><button class="b fix" id="resetAgents" title="Volta os agentes padrão ao original; os seus agentes são mantidos">Restaurar padrões</button></div>
+        </div>
+        <div class="card" id="aform" hidden>
+          <h3>✏️ Editar agente</h3>
+          <div class="row">
+            <div><label>Nome</label><input type="text" id="a_name" maxlength="30"></div>
+            <div><label>Função</label><select id="a_mode"></select></div>
+          </div>
+          <div id="a_nameErr" class="hint err"></div>
+          <label>Descrição <span class="hint">- identifica o agente e, se ele puder delegar, ajuda a escolher a quem passar cada tarefa</span></label><input type="text" id="a_desc">
+          <label>Instruções <span class="hint">- como o agente deve se comportar</span></label><textarea id="a_system" spellcheck="false"></textarea>
+          <label>Modelo de IA</label><select id="a_model"></select>
+          <label>Ferramentas que ele pode usar</label>
+          <div class="row opt"><label><input type="radio" name="a_toolsMode" value="all"> Todas (recomendado)</label><label><input type="radio" name="a_toolsMode" value="pick"> Só as marcadas</label></div>
+          <div id="a_tools" class="checks"></div>
+          <label>Skills que ele pode usar</label>
+          <div class="row opt"><label><input type="radio" name="a_skillsMode" value="all"> Todas</label><label><input type="radio" name="a_skillsMode" value="pick"> Só as marcadas</label></div>
+          <div id="a_skills" class="checks"></div>
+          <label>Permissões deste agente</label>
+          <div class="row"><span class="fix">Ler arquivos</span><select id="a_read"></select><span class="fix">Escrever/editar</span><select id="a_write"></select></div>
+          <div class="row" style="margin-top:6px"><span class="fix">Executar comandos</span><select id="a_exec"></select><span class="fix">Acessar a web</span><select id="a_net"></select></div>
+          <div class="row" style="margin-top:12px">
+            <label class="swl"><input type="checkbox" class="sw" id="a_deleg"> Pode passar tarefas a ajudantes</label>
+            <label class="inl fix">Passos máx. <input type="number" id="a_steps" min="1" max="100" style="width:64px"></label>
+            <label class="inl fix">Cor <input type="color" id="a_color"></label>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="b del fix" id="delAgent">🗑 Remover agente</button></div>
+        </div>
+      </section>
+
+      <section id="ext">
+        <div class="card">
+          <h3>🔗 Adicionar por endereço</h3>
+          <p class="sub">Cole o link de um projeto do GitHub (skills, plugins ou agentes).</p>
+          <div class="row"><input type="text" id="remoteUrl" placeholder="https://github.com/usuario/projeto"><button class="b pri fix" id="remoteGo">Analisar</button></div>
+          <div id="remoteMsg" class="hint"></div>
+          <div id="remoteRes" hidden>
+            <div id="remoteItems" class="xlist"></div>
+            <div class="row" style="margin-top:6px"><button class="b pri fix" id="remoteAdd">Adicionar selecionados</button><span class="hint" id="remoteSel"></span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📚 Skills</h3>
+          <p class="sub">Instruções especializadas (SKILL.md) que o agente carrega quando a tarefa combina com a descrição.</p>
+          <div class="row"><button class="b fix" id="addSkillDir">＋ Pasta de skill</button><button class="b fix" id="addSkillFile">＋ Arquivo .md</button><button class="b fix" id="openSkills">Abrir pasta</button></div>
+          <div id="skillList" class="xlist"></div>
+        </div>
+        <div class="card">
+          <h3>🔌 Plugins</h3>
+          <p class="sub">Adicionam ferramentas novas (pasta com index.js).</p>
+          <div class="row"><button class="b fix" id="addPlugin">＋ Pasta de plugin</button><button class="b fix" id="openPlugins">Abrir pasta</button></div>
+          <div id="pluginList" class="xlist"></div>
+          <div id="extMsg" class="hint"></div>
+          <div class="hint">Em Agentes, o campo "tools" de um agente pode listar o nome de um plugin para liberar todas as ferramentas dele. Plugins rodam código no seu PC: use só fontes confiáveis.</div>
+        </div>
+      </section>
+
+      <section id="general">
+        <div class="card">
+          <h3>🧠 Modelo e raciocínio</h3>
+          <label>Limite de contexto <span class="hint">(tokens; acima disso a conversa é resumida automaticamente. Use 48000 para o app detectar sozinho; 0 = desligado)</span></label><input type="number" id="contextLimit" min="0" step="1000">
+          <label>Raciocínio do modelo <span class="hint">(modelos que "pensam" antes de agir podem demorar minutos sem criar nada)</span></label>
+          <div class="row"><select id="reasoningMode"><option value="limit">Limitar</option><option value="off">Desligar</option><option value="free">Sem limite</option></select>
+            <span class="fix">Limite (tokens)</span><input type="number" id="reasoningLimit" min="500" step="500" class="fix" style="width:100px"></div>
+          <label class="swl"><input type="checkbox" class="sw" id="vision"> <span>Enviar imagens anexadas ao modelo <span class="hint"><br>só para modelos com visão; desligado = o texto da imagem é lido por OCR</span></span></label>
+        </div>
+
+        <div class="card">
+          <h3>📁 Pastas</h3>
+          <label>Pasta de trabalho dos agentes <span class="hint">(os pedidos criam uma subpasta aqui, a menos que "Pasta de saídas" esteja preenchida)</span></label><input type="text" id="workDir">
+          <label>Pasta de saídas <span class="hint">(opcional: separa os resultados da pasta de trabalho; vazio = usa a pasta de trabalho)</span></label><input type="text" id="outDir" placeholder="(padrão)">
+        </div>
+
+        <div class="card">
+          <h3>🔐 Permissões padrão</h3>
+          <p class="sub">allow = liberado · ask = pergunta antes · deny = bloqueado</p>
+          <div class="row"><span class="fix">Ler arquivos</span><select id="p_read"></select><span class="fix">Escrever/editar</span><select id="p_write"></select></div>
+          <div class="row" style="margin-top:6px"><span class="fix">Executar comandos</span><select id="p_exec"></select><span class="fix">Acessar a web</span><select id="p_net"></select></div>
+        </div>
+
+        <div class="card">
+          <h3>🎨 Aparência</h3>
+          <label>Tamanho do boneco: <b id="sizeV"></b> px <span class="hint">(também: role o mouse sobre o boneco)</span></label>
+          <div class="row"><input type="range" id="petSizeR" min="48" max="320" step="2"><input type="number" id="petSize" min="48" max="320" class="fix" style="width:80px"></div>
+          <div class="grid2">
+            <div><label>Transparência do boneco: <b id="poV"></b>%</label><input type="range" id="petOpacity" min="20" max="100"></div>
+            <div><label>Transparência do chat: <b id="coV"></b>%</label><input type="range" id="chatOpacity" min="20" max="100"></div>
+          </div>
+          <label style="margin-top:14px">Cores do chat <span class="hint">(efeito imediato)</span></label>
+          <div class="colors">
+            <label>Pergunta: fundo <input type="color" id="c_userBg"></label>
+            <label>Pergunta: texto <input type="color" id="c_userText"></label>
+            <label>Resposta: texto <input type="color" id="c_botText"></label>
+            <label>Resposta: fundo <input type="color" id="c_botBg"> <span class="nobg"><input type="checkbox" id="c_botNone"> sem fundo</span></label>
+            <label>Raciocínio: texto <input type="color" id="c_thinkText"></label>
+          </div>
+          <button class="b" id="colorsReset" style="margin-top:6px">Restaurar cores padrão</button>
+          <label class="swl" style="margin-top:12px"><input type="checkbox" class="sw" id="alwaysOnTop"> Sempre no topo</label>
+        </div>
+      </section>
+    </main>
+  </div>
+  <footer><button class="b pri" id="save">💾 Salvar</button><button class="b" id="close">Fechar</button><span id="msg"></span></footer>
+  <script src="settings.js"></script>
+</body></html>

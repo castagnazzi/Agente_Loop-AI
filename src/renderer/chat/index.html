@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+<link rel="stylesheet" href="chat.css"></head>
+<body>
+  <main id="panel">
+    <header><b>Loop-AI</b><button id="close" title="Fechar">&times;</button></header>
+    <section id="log"><div class="msg bot">Oi! Sou o Loop-AI. Digite um pedido, ou arraste um arquivo/imagem aqui (📎).</div></section>
+    <details id="reasoning" open>
+      <summary>🧠 Raciocínio</summary>
+      <pre id="think">O raciocínio e o código aparecem aqui…</pre>
+    </details>
+    <div id="status">📊 aguardando a primeira resposta…</div>
+    <div id="chips"></div>
+    <textarea id="input" rows="3" placeholder="O que você precisa?  (Enter envia · Shift+Enter quebra linha)"></textarea>
+    <footer>
+      <button id="settings" title="Configurações">🍀</button>
+      <button id="clear" title="Nova conversa (a atual fica salva)">🧹</button>
+      <button id="sessions" title="Conversas salvas">🕘</button>
+      <button id="attach" title="Anexar arquivo">📎</button>
+      <button id="export" title="Exportar conversa em HTML (imprimir/PDF)">💾</button>
+      <button id="undo" title="Desfazer alterações em arquivos feitas pelo agente">↩</button>
+      <button id="audit" title="Registro de atividades (para anexar ao laudo)">📋</button>
+      <button id="stop" title="Parar" hidden>⏹</button>
+    </footer>
+    <div id="overlay" hidden><div id="ovbox"><div class="ovh"><b id="ovtitle"></b><button id="ovclose" title="Fechar">&times;</button></div><div id="ovbody"></div></div></div>
+  </main>
+  <script src="chat.js"></script>
+</body></html>
