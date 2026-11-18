@@ -545,7 +545,7 @@ class Engine {
       content: `${agent.system}${catalog}\n\n${this.rules(tools.map((t) => t.function.name))}\n\nPasta de trabalho atual: ${ctx.cwd}\nPasta de saídas: ${this.outRoot()}\nSistema: Windows (PowerShell).`,
     });
     this.emit({ type: 'agent_start', id, parent, agent: agent.name, color: agent.color, model: `${provider.id}/${model}`, local: isLocalHost(provider.baseURL) });
-    let extraOk = rModo === 'off' && isLocalHost(provider.baseURL), errosSeguidos = 0;
+    let extraOk = rModo === 'off' && isLocalHost(provider.baseURL), errosSeguidos = 0, assinaturaAnterior = null, chamadasRepetidas = 0;
     let vazio = null, final = '', nudges = 0, cortes = 0, nudgeArquivos = 0, nudgeTeste = 0, testou = false, gravou = false, usouFerramenta = false, buscas = 0, leituras = 0, semBusca = false, semWeb = false, ferramentas = tools;
     try {
       for (let step = 0; step < (agent.steps || 25); step++) {
@@ -683,6 +683,19 @@ class Engine {
           if (depth === 0) this.view.push({ r: 'bot', t: final });
           break;
         }
+        // mesma(s) chamada(s) idêntica(s) repetida(s) em turnos seguidos (ex.: ficar checando se o QR Code
+        // do WhatsApp foi escaneado, ou se um servidor subiu) — todas "ok", então não conta como falha, mas
+        // sem isto o modelo fica num loop de verificação sem fim esperando algo externo que nunca chega.
+        const assinatura = JSON.stringify(r.toolCalls.map((c) => c.name + ':' + c.args).sort());
+        chamadasRepetidas = r.toolCalls.length && assinatura === assinaturaAnterior ? chamadasRepetidas + 1 : 0;
+        assinaturaAnterior = assinatura;
+        if (chamadasRepetidas === 2) messages.push({ role: 'user', content: '[Sistema] Você repetiu exatamente a mesma chamada de ferramenta 3 vezes seguidas sem progresso. Se está esperando uma ação externa que não vai acontecer sozinha neste teste (ex.: alguém escanear um QR Code, um serviço de terceiro responder, um arquivo externo aparecer), PARE de verificar em loop: explique ao usuário o que falta e o que ele precisa fazer, ou siga para a próxima parte do pedido.' });
+        if (chamadasRepetidas >= 5) {
+          final = '⚠ Parei: repeti a mesma verificação 6 vezes seguidas sem progresso (provavelmente esperando uma ação externa, como escanear um QR Code). Veja o que falta acima e envie "continue" depois de resolver, ou peça para seguir sem essa confirmação.';
+          this.emit({ type: 'text', id, text: final });
+          if (depth === 0) this.view.push({ r: 'bot', t: final });
+          break;
+        }
         // orçamento de pesquisa: no máximo 3 buscas (depois só leitura de páginas) e WEB_MAX consultas no total; depois exige a entrega
         buscas += r.toolCalls.filter((c) => c.name === 'websearch').length;
         leituras += r.toolCalls.filter((c) => c.name === 'webfetch').length;
@@ -695,7 +708,14 @@ class Engine {
           semBusca = true; ferramentas = sem(['websearch']); ctx.bloqueadas.add('websearch');
           messages.push({ role: 'user', content: `[Sistema] Você já fez ${buscas} pesquisas: chega de buscar. Agora leia as 3 a 4 páginas mais úteis (chame webfetch várias vezes na MESMA resposta, em paralelo) e em seguida escreva o resultado completo. Se já tiver o suficiente, escreva direto.` });
         }
-        if (step === (agent.steps || 25) - 1) final += '\n[limite de passos atingido]';
+        // último passo permitido: mesmo pedindo tools:[] e avisando no system prompt, alguns servidores locais
+        // chamam ferramenta mesmo assim (o template deles ignora isto) — a ferramenta roda normalmente, mas sem
+        // isto o pedido acabava aqui calado (nenhum "vazio"/nudge cobre este caso, pois houve tool_calls).
+        if (step === (agent.steps || 25) - 1) {
+          final = `${final ? final + '\n\n' : ''}⚠ Atingi o limite de ${agent.steps || 25} passos para este pedido${r.toolCalls.length ? ` (a última ação, ${r.toolCalls.map((c) => c.name).join(', ')}, ainda foi executada acima)` : ''}. Envie "continue" para seguir de onde parou.`;
+          this.emit({ type: 'text', id, text: final });
+          if (depth === 0) this.view.push({ r: 'bot', t: final });
+        }
       }
       // o modelo terminou sem escrever nada: antes o chat ficava mudo e parecia travado — explica o que houve
       if (vazio && !String(final || '').trim()) {
