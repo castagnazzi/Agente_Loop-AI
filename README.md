@@ -111,5 +111,9 @@ Copie a pasta inteira (com `node_modules`). Tudo fica no app:
 ## Contribuindo
 O projeto está em uso real e em evolução — issues, sugestões e pull requests são bem-vindos. Antes de abrir um PR grande, abra uma issue descrevendo o que pretende mudar. Ao reportar um problema, inclua: o que você pediu ao agente, o que esperava, o que aconteceu (texto do painel *Raciocínio*/erro ajuda muito) e o modelo de IA usado. Veja [`HISTORIA.md`](HISTORIA.md) para o contexto do projeto.
 
+## Correções recentes
+- Loop de verificação sem fim quando o agente espera algo externo (ex.: escanear QR Code) agora é detectado e avisado.
+- Ao atingir o limite de passos do agente, o chat sempre mostra um aviso (antes podia parar calado se o modelo chamasse uma ferramenta no último passo).
+
 ## Licença
 [MIT](LICENSE) © 2026 castagnazzi
